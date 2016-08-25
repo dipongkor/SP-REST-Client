@@ -1,0 +1,16 @@
+{
+    "manifest_version": 2,
+    "name": "SP REST Client",
+    "description": "Reordering List Columns",
+    "version": "1.0",
+    "browser_action": {
+        "default_icon": {
+            "19": "Icons/AppIcon.png",
+            "38": "Icons/AppIcon.png"
+        },
+        "default_popup": "Index.html"
+    },
+    "permissions": [
+        "activeTab"
+    ]
+}
