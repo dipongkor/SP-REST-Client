@@ -1,28 +1,8 @@
 (function () {
 
     function addSpRestClientInPage() {
-        var expandedLog = function (item, depth) {
-            var MAX_DEPTH = 100;
-            depth = depth || 0;
-
-            if (depth > MAX_DEPTH) {
-                console.log(item);
-                return;
-            }
-
-            if (typeof item == "object") {
-                for (var key in item) {
-                    var value = item[key];
-                    console.group(key + ' : ' + (typeof value));
-                    expandedLog(value, depth + 1);
-                    console.groupEnd();
-                }
-            } else {
-                console.log(item);
-            }
-        };
-
-        var syntaxHighlight = function (json) {
+        
+        var displayJson = function (json) {
             json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
                 var cls = 'number';
@@ -192,13 +172,14 @@
 
         var head = document.head || document.getElementsByTagName('head')[0];
         var style = document.createElement('style');
-
         style.type = 'text/css';
+        
         if (style.styleSheet) {
             style.styleSheet.cssText = css;
         } else {
             style.appendChild(document.createTextNode(css));
         }
+        
         head.appendChild(style);
 
         document.querySelector("#contentRow").innerHTML = "";
@@ -268,23 +249,21 @@
 
                 restApiExplorer.executeRequest(requestInfo)
                     .then(function (response) {
-                        expandedLog(response);
-                        var str = JSON.stringify(response, undefined, 4);
-                        document.querySelector("#response").innerHTML = '<pre>' + syntaxHighlight(str) + '</pre>';
+                        var responseAsString = JSON.stringify(response, undefined, 4);
+                        document.querySelector("#response").innerHTML = '<pre>' + displayJson(responseAsString) + '</pre>';
                         document.querySelector("#response").style.display = "block";
                     }, function (error) {
-                        expandedLog(error);
-                        var str = JSON.stringify(error, undefined, 4);
-                        document.querySelector("#response").innerHTML = '<pre>' + syntaxHighlight(str) + '</pre>';
+                        var responseAsString = JSON.stringify(error, undefined, 4);
+                        document.querySelector("#response").innerHTML = '<pre>' + displayJson(responseAsString) + '</pre>';
                         document.querySelector("#response").style.display = "block";
                     });
             } catch (error) {
-                expandedLog(error);
-                document.querySelector("#response").innerHTML = '<pre>' + syntaxHighlight(error.message) + '</pre>';
+                document.querySelector("#response").innerHTML = '<pre>' + displayJson(error.message) + '</pre>';
                 document.querySelector("#response").style.display = "block";
             }
         }
     }
+    
     function injectCodeToPage(code, args) {
         var script = document.createElement('script');
         script.textContent = '(' + code + ')(' + (args || '') + ');';
