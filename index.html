@@ -4,10 +4,30 @@
     <title>SP REST Client</title>
     <script src="Scripts/app.js"></script>
 </head>
+<style type="text/css">
+    #success {
+        display: none;
+    }
+
+    #error {
+        display: none;
+        color: red;
+    }
+
+    body {
+        width: 300px;
+    }
+</style>
 <body>
-    <div>
-        <p><b>Congratulation!!</b></p>
-        <p>SharePoint REST Client has been added to your Page.</p>
-    </div>
+<div id="loading">
+    <p><b>Adding ...</b> SharePoint REST Client on your current page</p>
+</div>
+<div id="success">
+    <p><b>Congratulation!!</b></p>
+    <p>SharePoint REST Client has been added on your Page.</p>
+</div>
+<div id="error">
+    <p><b>Unable to add SharePoint REST Client on your current page. Check console for more details.</b></p>
+</div>
 </body>
 </html>
