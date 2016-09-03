@@ -169,7 +169,7 @@
                 #requestType { width: 411px;height: 26px; }\
                 input[type='text'] { width: 406px;height: 22px; }\
                 #sendRequest {margin: 0;}\
-                #response { display:none;margin-left:10%;background:#eff0f1;margin-right:10%;padding:20px;margin-top:12px;border:3px solid }\
+                #response { display:none;margin-left:10%;background:#eff0f1;margin-right:10%;padding:20px;margin-top:12px;border:3px solid ; max-height: 800px; overflow: auto;}\
                 #requestForm { margin: 0 auto;font-family: sans-serif;font-size: 14px; }\
                 #restClientHeader {text-align: center;margin-bottom: 8px;font-weight: bold;font-family: cursive;}\
                 #sendRequest, #backToSite { font-size: 14px;font-family: sans-serif; }";
@@ -239,6 +239,11 @@
                                         <input type='button' value='BACK TO SITE' id='backToSite'>\
                                     </td>\
                                   </tr>\
+                                  <tr>\
+                                  <td colspan='2'>\
+                                    <img style='width: 447px;height: 22px;margin: 10px 0 0 0;display: none;' src='/_layouts/15/images/PROGRESS.GIF' id='spProgressbar'/>\
+                                  </td>\
+                                </tr>\
                             </table>\
                     </div>\
                     <div id='response'>";
@@ -288,6 +293,8 @@
 
         function executeRequest() {
             try {
+                document.querySelector("#response").style.display = "none";
+                document.querySelector("#spProgressbar").style.display = "block";
                 var requestInfo = {
                     requestType: document.querySelector("#requestType").value,
                     requestUrl: restApiExplorer.baseUrl + document.querySelector("#requestUrl").value,
@@ -299,6 +306,7 @@
                 if (!requestInfo.requestUrl) {
                     document.querySelector("#response").innerHTML = '<pre>' + 'Request Url can not be empty.' + '</pre>';
                     document.querySelector("#response").style.display = "block";
+                    document.querySelector("#spProgressbar").style.display = "none";
                 }
 
                 restApiExplorer.executeRequest(requestInfo)
@@ -306,14 +314,17 @@
                         var responseAsString = JSON.stringify(response, undefined, 4);
                         document.querySelector("#response").innerHTML = '<pre>' + displayJson(responseAsString) + '</pre>';
                         document.querySelector("#response").style.display = "block";
+                        document.querySelector("#spProgressbar").style.display = "none";
                     }, function (error) {
                         var responseAsString = JSON.stringify(error, undefined, 4);
                         document.querySelector("#response").innerHTML = '<pre>' + displayJson(responseAsString) + '</pre>';
                         document.querySelector("#response").style.display = "block";
+                        document.querySelector("#spProgressbar").style.display = "none";
                     });
             } catch (error) {
                 document.querySelector("#response").innerHTML = '<pre>' + displayJson(error.message) + '</pre>';
                 document.querySelector("#response").style.display = "block";
+                document.querySelector("#spProgressbar").style.display = "none";
             }
         }
     }
