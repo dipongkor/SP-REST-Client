@@ -165,6 +165,7 @@
                 .boolean { color: blue; }\
                 .null { color: magenta; }\
                 .key { color: red; }\
+                body {overflow: auto;}\
                 #requestBody { width: 405px; height: 180px; }\
                 #requestType { width: 411px;height: 26px; }\
                 input[type='text'] { width: 406px;height: 22px; }\
