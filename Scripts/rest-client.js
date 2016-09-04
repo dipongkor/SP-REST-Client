@@ -159,22 +159,22 @@
 
         /*Styles for REST Client*/
 
-        var css = "pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; overflow: auto; }\
+        var css = "pre { padding: 5px; margin: 5px; overflow: auto; }\
                 .string { color: green; }\
                 .number { color: darkorange; }\
                 .boolean { color: blue; }\
                 .null { color: magenta; }\
                 .key { color: red; }\
-                body {overflow: auto;}\
+                body {overflow: hidden;background: #eeeeee;}\
                 #requestBody { width: 405px; height: 180px; }\
                 #requestType { width: 411px;height: 26px; }\
                 input[type='text'] { width: 406px;height: 22px; }\
                 #sendRequest {margin: 0;}\
-                #response { display:none;margin-left:10%;background:#eff0f1;margin-right:10%;padding:20px;margin-top:12px;border:3px solid ; max-height: 800px; overflow: auto;}\
-                #requestForm { margin: 0 auto;font-family: sans-serif;font-size: 14px; }\
-                #restClientHeader {text-align: center;margin-bottom: 8px;font-weight: bold;font-family: cursive;}\
+                #response { display:none;background:#eff0f1;padding:5px;margin-top:12px;border:2px solid ; max-height: 800px; overflow: auto;}\
+                #requestForm {font-family: sans-serif;font-size: 14px; }\
+                #restClientHeader {text-align: center;font-weight: bold;font-family: cursive;color:white;}\
                 #sendRequest, #backToSite { font-size: 14px;font-family: sans-serif; }\
-                #spRestClientHistory{float:left;}";
+                #spRestClientHistory{float:left;overflow:auto; position:absolute; top: 0px; left:0px; right:0px; bottom:0px}";
 
         [].forEach.call(document.querySelectorAll("link"), function (element) {
             element.remove();
@@ -209,11 +209,15 @@
             /*Adding REST Client UI to the Page*/
 
             document.querySelector("form").style.display = 'none';
-            var clientHtml = "<div id='spRestClientHistory'>\
-                                    <h1>History</h1>\
-                                    <ul></ul>\
-                              </div>\
+            var clientHtml = "<div id='header' style='overflow:hidden;top:0;left:0;background: #929292;'>\
                               <h1 id='restClientHeader'>SharePoint REST Client</h1>\
+                              </div>\
+                              <div id='leftNav' style='overflow:auto;position:absolute;top: 95px;left: 8px;right:200px;bottom:1px;width: 20%;background: #dcdcdc;'>\
+                                    <h2 style='text-align: left;padding-left: 26px;color: #ec008c;'>History</h2>\
+                                    <hr>\
+                                    <ul></ul>\
+                             </div>\
+                             <div id='mainContent' style='overflow:hidden;position:absolute;top: 120px;left: 13%;right: 9px;bottom:1px;margin-left: 9%;'>\
                               <table id='requestForm'> \
                                   <tr>\
                                      <td>Url</td>\
@@ -245,14 +249,10 @@
                                         <input type='button' value='BACK TO SITE' id='backToSite'>\
                                     </td>\
                                   </tr>\
-                                  <tr>\
-                                  <td colspan='2'>\
-                                    <img style='width: 447px;height: 22px;margin: 10px 0 0 0;display: none;' src='/_layouts/15/images/PROGRESS.GIF' id='spProgressbar'/>\
-                                  </td>\
-                                </tr>\
                             </table>\
-                    </div>\
-                    <div id='response'>";
+                            <div id='response'>\
+                            </div>\
+                            </div>";
 
             var clientDiv = document.createElement("div");
             clientDiv.innerHTML = clientHtml;
@@ -299,8 +299,8 @@
 
         function executeRequest() {
             try {
-                document.querySelector("#response").style.display = "none";
-                document.querySelector("#spProgressbar").style.display = "block";
+                document.querySelector("#response").innerHTML = "<img src='/_layouts/15/images/loading16.GIF' id='spProgressbar' style='float: left;margin: 5px;height: 20px;'/>\
+                                                                     <h3 style='margin: 5px;'>Working on it. Please wait .....</h3>";
                 var requestInfo = {
                     requestType: document.querySelector("#requestType").value,
                     requestUrl: restApiExplorer.baseUrl + document.querySelector("#requestUrl").value,
@@ -312,7 +312,6 @@
                 if (!requestInfo.requestUrl) {
                     document.querySelector("#response").innerHTML = '<pre>' + 'Request Url can not be empty.' + '</pre>';
                     document.querySelector("#response").style.display = "block";
-                    document.querySelector("#spProgressbar").style.display = "none";
                 }
 
                 updateSpRestClientHistory();
@@ -322,17 +321,14 @@
                         var responseAsString = JSON.stringify(response, undefined, 4);
                         document.querySelector("#response").innerHTML = '<pre>' + displayJson(responseAsString) + '</pre>';
                         document.querySelector("#response").style.display = "block";
-                        document.querySelector("#spProgressbar").style.display = "none";
                     }, function (error) {
                         var responseAsString = JSON.stringify(error, undefined, 4);
                         document.querySelector("#response").innerHTML = '<pre>' + displayJson(responseAsString) + '</pre>';
                         document.querySelector("#response").style.display = "block";
-                        document.querySelector("#spProgressbar").style.display = "none";
                     });
             } catch (error) {
                 document.querySelector("#response").innerHTML = '<pre>' + displayJson(error.message) + '</pre>';
                 document.querySelector("#response").style.display = "block";
-                document.querySelector("#spProgressbar").style.display = "none";
             }
         }
         
@@ -346,7 +342,7 @@
         history.forEach(function (item) {
             historyListItems.push(String.format("<li>{0}{1}</li>", item.requestType, item.requestUrl));
         });
-        document.querySelector("#spRestClientHistory ul").innerHTML = historyListItems.join("");
+        document.querySelector("#leftNav ul").innerHTML = historyListItems.join("");
 
         function updateSpRestClientHistory() {
             var history = JSON.parse(window.localStorage.getItem("spRestClientHistory"));
@@ -357,13 +353,12 @@
                 requestBody: JSON.parse(document.querySelector("#requestBody").value),
                 ifMatch: document.querySelector("#version").value
             };
-
+            document.querySelector("#leftNav ul").innerHTML = String.format("<li>{0}{1}</li>", requestInfo.requestType, requestInfo.requestUrl) +
+                                                                document.querySelector("#leftNav ul").innerHTML;
             if (history.length > 20) {
                 history.pop();
             }
-
             history.unshift(requestInfo);
-
             window.localStorage.setItem("spRestClientHistory", JSON.stringify(history));
         }
     }
