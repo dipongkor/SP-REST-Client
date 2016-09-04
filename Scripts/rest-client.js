@@ -173,7 +173,8 @@
                 #response { display:none;margin-left:10%;background:#eff0f1;margin-right:10%;padding:20px;margin-top:12px;border:3px solid ; max-height: 800px; overflow: auto;}\
                 #requestForm { margin: 0 auto;font-family: sans-serif;font-size: 14px; }\
                 #restClientHeader {text-align: center;margin-bottom: 8px;font-weight: bold;font-family: cursive;}\
-                #sendRequest, #backToSite { font-size: 14px;font-family: sans-serif; }";
+                #sendRequest, #backToSite { font-size: 14px;font-family: sans-serif; }\
+                #spRestClientHistory{float:left;}";
 
         [].forEach.call(document.querySelectorAll("link"), function (element) {
             element.remove();
@@ -208,7 +209,11 @@
             /*Adding REST Client UI to the Page*/
 
             document.querySelector("form").style.display = 'none';
-            var clientHtml = "<h1 id='restClientHeader'>SharePoint REST Client</h1>\
+            var clientHtml = "<div id='spRestClientHistory'>\
+                                    <h1>History</h1>\
+                                    <ul></ul>\
+                              </div>\
+                              <h1 id='restClientHeader'>SharePoint REST Client</h1>\
                               <table id='requestForm'> \
                                   <tr>\
                                      <td>Url</td>\
@@ -257,9 +262,9 @@
                 window.location.reload();
             });
             document.querySelector("#requestType").addEventListener('change', requestTypeOnchange);
-            window.postMessage({id: "SpRestClient", key: "success", value: ""}, "*");
+            window.postMessage({ id: "SpRestClient", key: "success", value: "" }, "*");
         } catch (error) {
-            window.postMessage({id: "SpRestClient", key: "error", value: ""}, "*");
+            window.postMessage({ id: "SpRestClient", key: "error", value: "" }, "*");
             console.log(error.message);
         }
 
@@ -310,6 +315,8 @@
                     document.querySelector("#spProgressbar").style.display = "none";
                 }
 
+                updateSpRestClientHistory();
+
                 restApiExplorer.executeRequest(requestInfo)
                     .then(function (response) {
                         var responseAsString = JSON.stringify(response, undefined, 4);
@@ -327,6 +334,37 @@
                 document.querySelector("#response").style.display = "block";
                 document.querySelector("#spProgressbar").style.display = "none";
             }
+        }
+        
+        /* SP REST Client History */
+        if (!window.localStorage.getItem("spRestClientHistory")) {
+            window.localStorage.setItem("spRestClientHistory", JSON.stringify([]));
+        }
+
+        var history = JSON.parse(window.localStorage.getItem("spRestClientHistory"));
+        var historyListItems = [];
+        history.forEach(function (item) {
+            historyListItems.push(String.format("<li>{0}{1}</li>", item.requestType, item.requestUrl));
+        });
+        document.querySelector("#spRestClientHistory ul").innerHTML = historyListItems.join("");
+
+        function updateSpRestClientHistory() {
+            var history = JSON.parse(window.localStorage.getItem("spRestClientHistory"));
+            var requestInfo = {
+                id: history.length + 1,
+                requestType: document.querySelector("#requestType").value,
+                requestUrl: document.querySelector("#requestUrl").value,
+                requestBody: JSON.parse(document.querySelector("#requestBody").value),
+                ifMatch: document.querySelector("#version").value
+            };
+
+            if (history.length > 20) {
+                history.pop();
+            }
+
+            history.unshift(requestInfo);
+
+            window.localStorage.setItem("spRestClientHistory", JSON.stringify(history));
         }
     }
 
