@@ -174,7 +174,10 @@
                 #requestForm {font-family: sans-serif;font-size: 14px; }\
                 #restClientHeader {text-align: center;font-weight: bold;font-family: cursive;color:white;}\
                 #sendRequest, #backToSite { font-size: 14px;font-family: sans-serif; }\
-                #spRestClientHistory{float:left;overflow:auto; position:absolute; top: 0px; left:0px; right:0px; bottom:0px}";
+                #leftNav ul li {word-break: break-word;border-bottom: 1px solid #929292;padding: 7px;}\
+                #leftNav ul {padding: 0; margin: 0;}\
+                .get{background: #4285f4;color: white;padding: 4px;border-radius: 5px;}\
+                .url {color: #4035c7;font-size: 16.5px;padding: 5px;}";
 
         [].forEach.call(document.querySelectorAll("link"), function (element) {
             element.remove();
@@ -217,7 +220,7 @@
                                     <hr>\
                                     <ul></ul>\
                              </div>\
-                             <div id='mainContent' style='overflow:hidden;position:absolute;top: 120px;left: 13%;right: 9px;bottom:1px;margin-left: 9%;'>\
+                             <div id='mainContent' style='overflow:auto;position:absolute;top: 120px;left: 13%;right: 9px;bottom:1px;margin-left: 9%;'>\
                               <table id='requestForm'> \
                                   <tr>\
                                      <td>Url</td>\
@@ -340,7 +343,7 @@
         var history = JSON.parse(window.localStorage.getItem("spRestClientHistory"));
         var historyListItems = [];
         history.forEach(function (item) {
-            historyListItems.push(String.format("<li>{0}{1}</li>", item.requestType, item.requestUrl));
+            historyListItems.push(String.format("<li data-id='{0}'><span class='{1}'>{2}</span><span class='url'>{3}</span></li>", item.id, item.requestType.toLowerCase(), item.requestType, item.requestUrl));
         });
         document.querySelector("#leftNav ul").innerHTML = historyListItems.join("");
 
@@ -353,7 +356,7 @@
                 requestBody: JSON.parse(document.querySelector("#requestBody").value),
                 ifMatch: document.querySelector("#version").value
             };
-            document.querySelector("#leftNav ul").innerHTML = String.format("<li>{0}{1}</li>", requestInfo.requestType, requestInfo.requestUrl) +
+            document.querySelector("#leftNav ul").innerHTML = String.format("<li data-id='{0}'><span class='{1}'>{2}</span><span class='url'>{3}</span></li>", requestInfo.id, requestInfo.requestType.toLowerCase(), requestInfo.requestType, requestInfo.requestUrl) +
                                                                 document.querySelector("#leftNav ul").innerHTML;
             if (history.length > 20) {
                 history.pop();
