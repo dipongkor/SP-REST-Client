@@ -167,16 +167,19 @@
                 .key { color: red; }\
                 body {overflow: hidden;background: #eeeeee;}\
                 #requestBody { width: 405px; height: 180px; }\
-                #requestType { width: 411px;height: 26px; }\
+                #requestType { width: 410px;height: 26px; }\
                 input[type='text'] { width: 406px;height: 22px; }\
                 #sendRequest {margin: 0;}\
                 #response { display:none;background:#eff0f1;padding:5px;margin-top:12px;border:2px solid ; max-height: 800px; overflow: auto;}\
                 #requestForm {font-family: sans-serif;font-size: 14px; }\
-                #restClientHeader {text-align: center;font-weight: bold;font-family: cursive;color:white;}\
+                #restClientHeader {text-align: center;font-weight: bold;font-family: cursive;color:white;margin:10px;}\
                 #sendRequest, #backToSite { font-size: 14px;font-family: sans-serif; }\
                 #leftNav ul li {word-break: break-word;border-bottom: 1px solid #929292;padding: 7px;}\
-                #leftNav ul {padding: 0; margin: 0;}\
+                #leftNav ul {padding: 0; margin: 0; cursor: pointer;}\
                 .get{background: #4285f4;color: white;padding: 4px;border-radius: 5px;}\
+                .post{background: #34a853;color: white;padding: 4px;border-radius: 5px;}\
+                .update{background: #fbbc05;color: white;padding: 4px;border-radius: 5px;}\
+                .delete{background: #ea4335;color: white;padding: 4px;border-radius: 5px;}\
                 .url {color: #4035c7;font-size: 16.5px;padding: 5px;}";
 
         [].forEach.call(document.querySelectorAll("link"), function (element) {
@@ -215,12 +218,12 @@
             var clientHtml = "<div id='header' style='overflow:hidden;top:0;left:0;background: #929292;'>\
                               <h1 id='restClientHeader'>SharePoint REST Client</h1>\
                               </div>\
-                              <div id='leftNav' style='overflow:auto;position:absolute;top: 95px;left: 8px;right:200px;bottom:1px;width: 20%;background: #dcdcdc;'>\
+                              <div id='leftNav' style='overflow:auto;position:absolute;top: 72px;left: 8px;right:200px;bottom:1px;width: 20%;background: #dcdcdc;'>\
                                     <h2 style='text-align: left;padding-left: 26px;color: #ec008c;'>History</h2>\
                                     <hr>\
                                     <ul></ul>\
                              </div>\
-                             <div id='mainContent' style='overflow:auto;position:absolute;top: 120px;left: 13%;right: 9px;bottom:1px;margin-left: 9%;'>\
+                             <div id='mainContent' style='overflow:auto;position:absolute;top: 108px;left: 13%;right: 9px;bottom:1px;margin-left: 9%;'>\
                               <table id='requestForm'> \
                                   <tr>\
                                      <td>Url</td>\
@@ -345,12 +348,55 @@
         history.forEach(function (item) {
             historyListItems.push(String.format("<li data-id='{0}'><span class='{1}'>{2}</span><span class='url'>{3}</span></li>", item.id, item.requestType.toLowerCase(), item.requestType, item.requestUrl));
         });
+
         document.querySelector("#leftNav ul").innerHTML = historyListItems.join("");
+
+        [].forEach.call(document.querySelectorAll("#leftNav ul li"), function (element) {
+            element.addEventListener("click", historyItemOnClick);
+        });
+
+        function historyItemOnClick(event) {
+            var historyItemId = event.currentTarget.getAttribute("data-id");
+            var history = JSON.parse(window.localStorage.getItem("spRestClientHistory"));
+            var historyItem = history.find(function (item) {
+                return item.id == historyItemId;
+            });
+            document.querySelector("#response").style.display = "none";
+            document.querySelector("#requestType").value = historyItem.requestType;
+            document.querySelector("#requestUrl").value = historyItem.requestUrl;
+            document.querySelector("#requestBody").value = JSON.stringify(historyItem.requestBody);
+            document.querySelector("#version").value = historyItem.ifMatch;
+
+            switch (historyItem.requestType) {
+                case "GET": {
+                    document.querySelector("#requestBodyTR").style.display = "none";
+                    document.querySelector("#versionTR").style.display = "none";
+                    break;
+                }
+                case "POST": {
+                    document.querySelector("#requestBodyTR").style.display = "";
+                    document.querySelector("#versionTR").style.display = "none";
+                    break;
+                }
+                case "UPDATE": {
+                    document.querySelector("#requestBodyTR").style.display = "";
+                    document.querySelector("#versionTR").style.display = "";
+                    break;
+                }
+                case "DELETE": {
+                    document.querySelector("#requestBodyTR").style.display = "none";
+                    document.querySelector("#versionTR").style.display = "";
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
 
         function updateSpRestClientHistory() {
             var history = JSON.parse(window.localStorage.getItem("spRestClientHistory"));
             var requestInfo = {
-                id: history.length + 1,
+                id: uniqueId(),
                 requestType: document.querySelector("#requestType").value,
                 requestUrl: document.querySelector("#requestUrl").value,
                 requestBody: JSON.parse(document.querySelector("#requestBody").value),
@@ -358,11 +404,25 @@
             };
             document.querySelector("#leftNav ul").innerHTML = String.format("<li data-id='{0}'><span class='{1}'>{2}</span><span class='url'>{3}</span></li>", requestInfo.id, requestInfo.requestType.toLowerCase(), requestInfo.requestType, requestInfo.requestUrl) +
                                                                 document.querySelector("#leftNav ul").innerHTML;
-            if (history.length > 20) {
+            if (history.length > 500) {
                 history.pop();
             }
             history.unshift(requestInfo);
             window.localStorage.setItem("spRestClientHistory", JSON.stringify(history));
+
+            [].forEach.call(document.querySelectorAll("#leftNav ul li"), function (element) {
+                element.addEventListener("click", historyItemOnClick);
+            });
+        }
+
+        function uniqueId() {
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            }
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                s4() + '-' + s4() + s4() + s4();
         }
     }
 
