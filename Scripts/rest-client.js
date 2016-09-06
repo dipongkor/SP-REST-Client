@@ -174,13 +174,14 @@
                 #requestForm {font-family: sans-serif;font-size: 14px; }\
                 #restClientHeader {text-align: center;font-weight: bold;font-family: cursive;color:white;margin:10px;}\
                 #sendRequest, #backToSite { font-size: 14px;font-family: sans-serif; }\
-                #leftNav ul li {word-break: break-word;border-bottom: 1px solid #929292;padding: 7px;}\
+                .historyItem {word-break: break-word;border-bottom: 1px solid #929292;padding: 7px;}\
                 #leftNav ul {padding: 0; margin: 0; cursor: pointer;}\
                 .get{background: #4285f4;color: white;padding: 4px;border-radius: 5px;}\
                 .post{background: #34a853;color: white;padding: 4px;border-radius: 5px;}\
                 .update{background: #fbbc05;color: white;padding: 4px;border-radius: 5px;}\
                 .delete{background: #ea4335;color: white;padding: 4px;border-radius: 5px;}\
-                .url {color: #4035c7;font-size: 16.5px;padding: 5px;}";
+                .url {color: #4035c7;font-size: 16.5px;padding: 5px;cursor:pointer;}\
+                .removeHistory{color:#4c4545;cursor:pointer;}";
 
         [].forEach.call(document.querySelectorAll("link"), function (element) {
             element.remove();
@@ -221,7 +222,7 @@
                               <div id='leftNav' style='overflow:auto;position:absolute;top: 72px;left: 8px;right:200px;bottom:1px;width: 20%;background: #dcdcdc;'>\
                                     <h2 style='text-align: left;padding-left: 26px;color: #ec008c;'>History</h2>\
                                     <hr>\
-                                    <ul></ul>\
+                                    <div id='historyList'></div>\
                              </div>\
                              <div id='mainContent' style='overflow:auto;position:absolute;top: 108px;left: 13%;right: 9px;bottom:1px;margin-left: 9%;'>\
                               <table id='requestForm'> \
@@ -335,6 +336,7 @@
             } catch (error) {
                 document.querySelector("#response").innerHTML = '<pre>' + displayJson(error.message) + '</pre>';
                 document.querySelector("#response").style.display = "block";
+                console.log(error);
             }
         }
         
@@ -346,17 +348,33 @@
         var history = JSON.parse(window.localStorage.getItem("spRestClientHistory"));
         var historyListItems = [];
         history.forEach(function (item) {
-            historyListItems.push(String.format("<li data-id='{0}'><span class='{1}'>{2}</span><span class='url'>{3}</span></li>", item.id, item.requestType.toLowerCase(), item.requestType, item.requestUrl));
+            historyListItems.push(String.format("<div data-id='{0}' class='historyItem'><span class='{1}'>{2}</span><span class='url'>{3}</span><span  class='removeHistory' title='Remove'>❎</span></div>", item.id, item.requestType.toLowerCase(), item.requestType, item.requestUrl));
         });
 
-        document.querySelector("#leftNav ul").innerHTML = historyListItems.join("");
+        document.querySelector("#historyList").innerHTML = historyListItems.join("");
 
-        [].forEach.call(document.querySelectorAll("#leftNav ul li"), function (element) {
+        [].forEach.call(document.querySelectorAll(".url"), function (element) {
             element.addEventListener("click", historyItemOnClick);
         });
 
+        [].forEach.call(document.querySelectorAll(".removeHistory"), function (element) {
+            element.addEventListener("click", removeHistoryOnClick);
+        });
+
+        function removeHistoryOnClick(event) {
+            event.currentTarget.parentNode.style.display = "none";
+            var historyItemId = event.currentTarget.parentNode.getAttribute("data-id");
+            var history = JSON.parse(window.localStorage.getItem("spRestClientHistory")) || [];
+            var historyItem = history.find(function (item) {
+                return item.id == historyItemId;
+            });
+            var historyItemIndex = history.indexOf(historyItem);
+            history.splice(historyItemIndex, 1);
+            window.localStorage.setItem("spRestClientHistory", JSON.stringify(history));
+        }
+
         function historyItemOnClick(event) {
-            var historyItemId = event.currentTarget.getAttribute("data-id");
+            var historyItemId = event.currentTarget.parentNode.getAttribute("data-id");
             var history = JSON.parse(window.localStorage.getItem("spRestClientHistory"));
             var historyItem = history.find(function (item) {
                 return item.id == historyItemId;
@@ -364,7 +382,7 @@
             document.querySelector("#response").style.display = "none";
             document.querySelector("#requestType").value = historyItem.requestType;
             document.querySelector("#requestUrl").value = historyItem.requestUrl;
-            document.querySelector("#requestBody").value = JSON.stringify(historyItem.requestBody);
+            document.querySelector("#requestBody").value = JSON.stringify(historyItem.requestBody, null, 2);
             document.querySelector("#version").value = historyItem.ifMatch;
 
             switch (historyItem.requestType) {
@@ -402,16 +420,20 @@
                 requestBody: JSON.parse(document.querySelector("#requestBody").value),
                 ifMatch: document.querySelector("#version").value
             };
-            document.querySelector("#leftNav ul").innerHTML = String.format("<li data-id='{0}'><span class='{1}'>{2}</span><span class='url'>{3}</span></li>", requestInfo.id, requestInfo.requestType.toLowerCase(), requestInfo.requestType, requestInfo.requestUrl) +
-                                                                document.querySelector("#leftNav ul").innerHTML;
+            document.querySelector("#historyList").innerHTML = String.format("<div data-id='{0}' class='historyItem'><span class='{1}'>{2}</span><span class='url'>{3}</span><span  class='removeHistory' title='Remove'>✕</span></div>", requestInfo.id, requestInfo.requestType.toLowerCase(), requestInfo.requestType, requestInfo.requestUrl) +
+                                                                document.querySelector("#historyList").innerHTML;
             if (history.length > 500) {
                 history.pop();
             }
             history.unshift(requestInfo);
             window.localStorage.setItem("spRestClientHistory", JSON.stringify(history));
 
-            [].forEach.call(document.querySelectorAll("#leftNav ul li"), function (element) {
+            [].forEach.call(document.querySelectorAll(".url"), function (element) {
                 element.addEventListener("click", historyItemOnClick);
+            });
+
+            [].forEach.call(document.querySelectorAll(".removeHistory"), function (element) {
+                element.addEventListener("click", removeHistoryOnClick);
             });
         }
 
