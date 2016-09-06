@@ -420,7 +420,7 @@
                 requestBody: JSON.parse(document.querySelector("#requestBody").value),
                 ifMatch: document.querySelector("#version").value
             };
-            document.querySelector("#historyList").innerHTML = String.format("<div data-id='{0}' class='historyItem'><span class='{1}'>{2}</span><span class='url'>{3}</span><span  class='removeHistory' title='Remove'>✕</span></div>", requestInfo.id, requestInfo.requestType.toLowerCase(), requestInfo.requestType, requestInfo.requestUrl) +
+            document.querySelector("#historyList").innerHTML = String.format("<div data-id='{0}' class='historyItem'><span class='{1}'>{2}</span><span class='url'>{3}</span><span  class='removeHistory' title='Remove'>❎</span></div>", requestInfo.id, requestInfo.requestType.toLowerCase(), requestInfo.requestType, requestInfo.requestUrl) +
                                                                 document.querySelector("#historyList").innerHTML;
             if (history.length > 500) {
                 history.pop();
