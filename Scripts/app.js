@@ -13,6 +13,8 @@
         }
     };
     chrome.tabs.executeScript(null, {file: 'Scripts/message-listener.js'});
+    
+    chrome.tabs.executeScript(null, {file: 'Scripts/angular.js'});
 
     chrome.runtime.onConnect.addListener(function (port) {
         port.onMessage.addListener(messageListener);
