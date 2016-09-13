@@ -23,7 +23,7 @@
 
         var RestApiExplorer = (function () {
             function RestApiExplorer(baseUrl) {
-                this.baseUrl = baseUrl || _spPageContextInfo.siteAbsoluteUrl;
+                this.baseUrl = baseUrl || _spPageContextInfo.webAbsoluteUrl;
                 this.formDigestValue = document.querySelector("#__REQUESTDIGEST").value;
             }
 
