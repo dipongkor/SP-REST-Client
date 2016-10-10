@@ -181,11 +181,14 @@
                 .update{background: #fbbc05;color: white;padding: 4px;border-radius: 5px;}\
                 .delete{background: #ea4335;color: white;padding: 4px;border-radius: 5px;}\
                 .url {color: #4035c7;font-size: 16.5px;padding: 5px;cursor:pointer;}\
+                #sharepoint-plex{color: #4285f4;cursor: pointer;}\
                 .removeHistory{color:#4c4545;cursor:pointer;}";
 
         [].forEach.call(document.querySelectorAll("link"), function (element) {
             element.remove();
         });
+
+
 
         var head = document.head || document.getElementsByTagName('head')[0];
         var style = document.createElement('style');
@@ -217,7 +220,7 @@
 
             document.querySelector("form").style.display = 'none';
             var clientHtml = "<div id='header' style='overflow:hidden;top:0;left:0;background: #929292;'>\
-                              <h1 id='restClientHeader'>SharePoint REST Client</h1>\
+                              <h1 id='restClientHeader'>SharePoint REST Client (Powered by <span id='sharepoint-plex'>SharePoint Plex</span>)</h1>\
                               </div>\
                               <div id='leftNav' style='overflow:auto;position:absolute;top: 72px;left: 8px;right:200px;bottom:1px;width: 20%;background: #dcdcdc;'>\
                                     <h2 style='text-align: left;padding-left: 26px;color: #ec008c;'>History</h2>\
@@ -269,6 +272,10 @@
                 window.location.reload();
             });
             document.querySelector("#requestType").addEventListener('change', requestTypeOnchange);
+            document.querySelector("#sharepoint-plex").addEventListener('click', function () {
+                var win = window.open("http://sharepointplex.com", '_blank');
+                win.focus();
+            });
             window.postMessage({ id: "SpRestClient", key: "success", value: "" }, "*");
         } catch (error) {
             window.postMessage({ id: "SpRestClient", key: "error", value: "" }, "*");
