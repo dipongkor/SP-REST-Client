@@ -5,7 +5,7 @@
             document.querySelector("#loading").style.display = "none";
             document.querySelector("#success").style.display = "block";
             setTimeout(function () {
-                window.close();
+               // window.close();
             }, 3000);
         } else {
             document.querySelector("#loading").style.display = "none";
@@ -18,6 +18,8 @@
     chrome.runtime.onConnect.addListener(function (port) {
         port.onMessage.addListener(messageListener);
     });
+
+    chrome.tabs.executeScript(1, { file: "Scripts/jquery-3.1.1.min.js" });
 
     chrome.tabs.executeScript(null, {file: 'Scripts/rest-client.js'});
 })();
